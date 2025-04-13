@@ -86,17 +86,14 @@ function HomeContent() {
           )}
 
           {role === 'cajero' && (
-            <TouchableOpacity style={styles.optionButton} onPress={() => handleOptionPress('/(app)/cashierDashboard')}>
+            <TouchableOpacity style={styles.optionButton} onPress={() => handleOptionPress('/(app)/Cajero/cajeroDashboard')}>
               <Text style={styles.optionText}>Panel de Caja</Text>
             </TouchableOpacity>
           )}
 
           {role === 'mesero' && (
             <>
-              <TouchableOpacity style={styles.optionButton} onPress={() => handleOptionPress('/(app)/createOrder')}>
-                <Text style={styles.optionText}>Crear pedido</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.optionButton} onPress={() => handleOptionPress('/(app)/tableManagement')}>
+              <TouchableOpacity style={styles.optionButton} onPress={() => handleOptionPress('/(app)/Mesero/tableManagement')}>
                 <Text style={styles.optionText}>Gestión de mesas</Text>
               </TouchableOpacity>
             </>
