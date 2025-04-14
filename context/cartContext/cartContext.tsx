@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { getFirestore, collection, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/utils/firebaseConfig'; // Firestore config
 import { useAuthContext } from '@/context/authContext/AuthContext';
 
@@ -18,6 +18,7 @@ interface CartContextValue {
   updateItemQuantity: (id: string, quantity: number) => void;
   createOrder: () => Promise<string>;  // Function to create the order in Firestore
   updateOrderStatus: (orderId: string, status: string) => Promise<void>;  // Update order status
+  moveOrderToPagados: (orderId: string) => Promise<void>;
 }
 
 const CartContext = createContext<CartContextValue>({
@@ -27,6 +28,7 @@ const CartContext = createContext<CartContextValue>({
   updateItemQuantity: () => {},
   createOrder: async () => {return ""; },
   updateOrderStatus: async () => {},
+  moveOrderToPagados: async () => {},
 });
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
@@ -95,14 +97,57 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         updatedAt: new Date(),
       });
       console.log(`Order ${orderId} status updated to ${status}`);
+      
+      // If the status is changed to "Pagado", move the order to the 'pagados' collection
+      if (status === "Pagado") {
+        await moveOrderToPagados(orderId);
+      }
     } catch (error) {
       console.error("Error updating status: ", error);
       throw error;
     }
   };
 
+  //Mover ordenes de orders a pagados
+  // Function to move orders from 'orders' to 'pagados' collection
+  const moveOrderToPagados = async (orderId: string) => {
+    try {
+      // 1. Get the order document from 'orders' collection
+      const orderRef = doc(db, 'orders', orderId);
+      const orderSnapshot = await getDoc(orderRef);
+    
+      if (!orderSnapshot.exists()) {
+        console.error(`Order with ID ${orderId} does not exist`);
+        return;
+      }
+    
+      const orderData = orderSnapshot.data();
+    
+      // 2. Add the order to the 'pagados' collection
+      // We use the same ID to maintain consistency
+      await addDoc(collection(db, 'pagados'), {
+        ...orderData,
+        paidAt: new Date(), // Add a timestamp for when it was paid
+        originalOrderId: orderId // Keep reference to the original order ID
+      });
+    
+      console.log(`Order ${orderId} moved to 'pagados' collection`);
+    
+      // 3. Delete the order from the original 'orders' collection
+      await deleteDoc(orderRef);
+      console.log(`Order ${orderId} deleted from 'orders' collection`);
+    
+    } catch (error) {
+      console.error("Error moving order to pagados: ", error);
+      throw error;
+    }
+  };
+
+
+  
+
   return (
-    <CartContext.Provider value={{ cartItems, addItemToCart, removeItemFromCart, updateItemQuantity, createOrder, updateOrderStatus }}>
+    <CartContext.Provider value={{ cartItems, addItemToCart, removeItemFromCart, updateItemQuantity, createOrder, updateOrderStatus, moveOrderToPagados }}>
       {children}
     </CartContext.Provider>
   );
