@@ -6,22 +6,7 @@ import { useCartContext } from '@/context/cartContext/cartContext';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '@/utils/firebaseConfig';
 import { colors } from '@/constants/Colors';
-
-// Interface para tipar correctamente los datos
-interface OrderItem {
-  name: string;
-  quantity: number;
-  price: string;
-}
-
-interface Order {
-  id: string;
-  status: string;
-  items: OrderItem[];
-  total: number;
-  createdAt: any;
-  tableNumber: string;
-}
+import { Order } from '@/interfaces/common'; 
 
 export default function CashierDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -131,16 +116,21 @@ export default function CashierDashboard() {
           <Text style={[styles.billItemText, {flex: 1, textAlign: 'right'}]}>Total</Text>
         </View>
         
-        {selectedOrder.items.map((item, index) => (
-          <View key={index} style={styles.billItemRow}>
-            <Text style={[styles.billItemDetailText, {flex: 2}]}>{item.name}</Text>
-            <Text style={[styles.billItemDetailText, {flex: 1, textAlign: 'center'}]}>{item.quantity}</Text>
-            <Text style={[styles.billItemDetailText, {flex: 1, textAlign: 'right'}]}>${item.price}</Text>
-            <Text style={[styles.billItemDetailText, {flex: 1, textAlign: 'right'}]}>
-              ${(parseFloat(item.price) * item.quantity).toFixed(2)}
-            </Text>
-          </View>
-        ))}
+        {selectedOrder.items.map((item, index) => {
+          // Asegurarse de que el precio sea un string
+          const priceStr = typeof item.price === 'number' ? item.price.toString() : item.price;
+          
+          return (
+            <View key={index} style={styles.billItemRow}>
+              <Text style={[styles.billItemDetailText, {flex: 2}]}>{item.name}</Text>
+              <Text style={[styles.billItemDetailText, {flex: 1, textAlign: 'center'}]}>{item.quantity}</Text>
+              <Text style={[styles.billItemDetailText, {flex: 1, textAlign: 'right'}]}>${priceStr}</Text>
+              <Text style={[styles.billItemDetailText, {flex: 1, textAlign: 'right'}]}>
+                ${(parseFloat(priceStr) * item.quantity).toFixed(2)}
+              </Text>
+            </View>
+          );
+        })}
         
         <View style={styles.billSummary}>
           <View style={styles.billTotalRow}>
@@ -160,54 +150,61 @@ export default function CashierDashboard() {
     );
   };
 
-  const renderOrderItem = ({ item }: { item: Order }) => (
-    <TouchableOpacity 
-      style={styles.orderItem}
-      onPress={() => {
-        if (item.status === "Listo para pagar") {
-          setSelectedOrder(item);
-          setPaymentModalVisible(true);
-        }
-      }}
-      disabled={item.status !== "Listo para pagar"}
-    >
-      <View style={styles.headerRow}>
-        <View style={styles.idRow}>
-          <Text style={styles.orderIdText}>ID: {item.id.substring(0, 8)}...</Text>
-        </View>
-        <View style={styles.statusRow}>
-          <Text style={styles.orderText}>Status: </Text>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-            <Text style={styles.statusText}>{item.status}</Text>
+  const renderOrderItem = ({ item }: { item: Order }) => {
+    return (
+      <TouchableOpacity 
+        style={styles.orderItem}
+        onPress={() => {
+          if (item.status === "Listo para pagar") {
+            setSelectedOrder(item);
+            setPaymentModalVisible(true);
+          }
+        }}
+        disabled={item.status !== "Listo para pagar"}
+      >
+        <View style={styles.headerRow}>
+          <View style={styles.idRow}>
+            <Text style={styles.orderIdText}>ID: {item.id.substring(0, 8)}...</Text>
+          </View>
+          <View style={styles.statusRow}>
+            <Text style={styles.orderText}>Status: </Text>
+            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
+              <Text style={styles.statusText}>{item.status}</Text>
+            </View>
           </View>
         </View>
-      </View>
 
-      <Text style={styles.dateText}>Fecha: {formatDate(item.createdAt)}</Text>
-      <Text style={styles.tableText}>Mesa: {item.tableNumber}</Text>
-      <Text style={styles.orderText}>Items:</Text>
-      {item.items.map((menuItem: OrderItem, index: number) => (
-        <Text key={index} style={styles.itemText}>
-          {menuItem.name} x {menuItem.quantity} = ${(parseFloat(menuItem.price) * menuItem.quantity).toFixed(2)}
-        </Text>
-      ))}
+        <Text style={styles.dateText}>Fecha: {formatDate(item.createdAt)}</Text>
+        <Text style={styles.tableText}>Mesa: {item.tableNumber}</Text>
+        <Text style={styles.orderText}>Items:</Text>
+        {item.items.map((menuItem, index) => {
+          // Asegurarse de que el precio sea un string
+          const priceStr = typeof menuItem.price === 'number' ? menuItem.price.toString() : menuItem.price;
+          
+          return (
+            <Text key={index} style={styles.itemText}>
+              {menuItem.name} x {menuItem.quantity} = ${(parseFloat(priceStr) * menuItem.quantity).toFixed(2)}
+            </Text>
+          );
+        })}
 
-      <View style={styles.totalContainer}>
-        <Text style={styles.totalText}>Total: ${item.total.toFixed(2)}</Text>
-        {item.status === "Listo para pagar" && (
-          <TouchableOpacity 
-            style={styles.payButton}
-            onPress={() => {
-              setSelectedOrder(item);
-              setPaymentModalVisible(true);
-            }}
-          >
-            <Text style={styles.payButtonText}>Procesar Pago</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
+        <View style={styles.totalContainer}>
+          <Text style={styles.totalText}>Total: ${item.total.toFixed(2)}</Text>
+          {item.status === "Listo para pagar" && (
+            <TouchableOpacity 
+              style={styles.payButton}
+              onPress={() => {
+                setSelectedOrder(item);
+                setPaymentModalVisible(true);
+              }}
+            >
+              <Text style={styles.payButtonText}>Procesar Pago</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -228,7 +225,6 @@ export default function CashierDashboard() {
         >
           <Picker.Item label="Todos" value="all" />
           <Picker.Item label="Listo para pagar" value="Listo para pagar" />
-          <Picker.Item label="Pagado" value="Pagado" />
           <Picker.Item label="Entregado" value="Entregado" />
           <Picker.Item label="Listo para llevar a la mesa" value="Listo para llevar a la mesa" />
           <Picker.Item label="Hecho" value="Hecho" />
