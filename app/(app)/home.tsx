@@ -110,6 +110,9 @@ function HomeContent() {
               <TouchableOpacity style={styles.optionButton} onPress={() => handleOptionPress('/(app)/Admin/MenuDashboard')}>
                 <Text style={styles.optionText}>Ver menú</Text>
               </TouchableOpacity>
+              <TouchableOpacity style={styles.optionButton} onPress={() => handleOptionPress('/(app)/Admin/paidOrders')}>
+                <Text style={styles.optionText}>Ver ordenes pagadas</Text>
+              </TouchableOpacity>
             </>
           )}
         </Animated.View>

@@ -6,22 +6,7 @@ import { useCartContext } from '@/context/cartContext/cartContext';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '@/utils/firebaseConfig';
 import { colors } from '@/constants/Colors';
-
-// Interface para tipar correctamente los datos
-interface OrderItem {
-  name: string;
-  quantity: number;
-  price: number;
-}
-
-interface Order {
-  id: string;
-  status: string;
-  items: OrderItem[];
-  total: number;
-  createdAt: any;
-  tableNumber: string;
-}
+import { OrderItem, Order } from '@/interfaces/common';
 
 export default function WaiterOrders() {
   const [orders, setOrders] = useState<Order[]>([]);

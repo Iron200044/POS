@@ -7,22 +7,7 @@ import { useCartContext } from '@/context/cartContext/cartContext';
 import { collection, getDocs, query, orderBy, doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/utils/firebaseConfig';
 import { colors } from '@/constants/Colors';
-
-// Interface para tipar correctamente los datos
-interface OrderItem {
-  name: string;
-  quantity: number;
-  price: number;
-}
-
-interface Order {
-  id: string;
-  status: string;
-  items: OrderItem[];
-  total: number;
-  createdAt: any;
-  tableNumber: string;
-}
+import { Order, OrderItem } from '@/interfaces/common';
 
 export default function ChefOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
