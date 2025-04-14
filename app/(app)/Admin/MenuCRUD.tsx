@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ActivityIndicator } from 'react-native';
-import CameraModal from '@/components/cameraModal';
+import CameraModal from '@/components/camaraModalAdmin';
 import { colors } from '@/constants/Colors';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useDataContext, MenuItem } from '@/context/dataContext/DataContext';

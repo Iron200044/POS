@@ -62,32 +62,39 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       // Obtener el arrayBuffer de la imagen seleccionada
       const arrayBuffer = await fetch(uri).then(res => res.arrayBuffer());
-      const fileName = uri.split('/').pop() ?? 'image.jpg'; // Extraer el nombre del archivo
-      const blob = new Blob([arrayBuffer], { type: 'image/jpeg' }); // Convertir el arrayBuffer en Blob
-  
-      // Subir el archivo a Supabase
+      
+      // Crear un nombre de archivo único con timestamp
+      const originalFileName = uri.split('/').pop() ?? 'image.jpg';
+      const timestamp = Date.now();
+      const uniqueFileName = `${timestamp}-${originalFileName}`;
+      
+      console.log('Generando nombre único:', uniqueFileName);
+      
+      const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
+    
+      // Subir el archivo a Supabase con el nombre único
       const { data, error } = await supabase.storage
-        .from('menuimgs') // Nombre del bucket en Supabase
-        .upload(fileName, blob, {
+        .from('menuimgs')
+        .upload(uniqueFileName, blob, {
           contentType: 'image/jpeg',
         });
-  
+    
       if (error) {
         console.error('Error uploading image to Supabase:', error.message);
-        return null; // Retornar null si hubo un error
+        return null;
       }
-  
+    
       // Obtener la URL pública de la imagen subida
       const publicUrl = supabase.storage.from('menuimgs').getPublicUrl(data.path);
       console.log('Image uploaded successfully:', publicUrl.data.publicUrl);
-  
-      return publicUrl.data.publicUrl; // Retornar la URL pública
+    
+      return publicUrl.data.publicUrl;
     } catch (error) {
       console.error('Error uploading image:', error);
-      return null; // Retornar null en caso de error
+      return null;
     }
   };
-
+  
   // Function to add a new item
   const addMenuItem = async (item: MenuItem) => {
     try {

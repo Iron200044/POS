@@ -45,11 +45,6 @@ export default function MenuDashboard() {
 
     return (
       <View style={styles.itemContainer}>
-        {/* Botón de regreso al Home */}
-        <TouchableOpacity style={styles.goBackButton} onPress={() => router.push('/(app)/home')}>
-          <Text style={styles.goBackText}>← Regresar</Text>
-        </TouchableOpacity>
-
         {/* Primera fila: Imagen y detalles principales */}
         <View style={styles.itemTopRow}>
           <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
@@ -99,6 +94,10 @@ export default function MenuDashboard() {
 
   return (
     <View style={styles.container}>
+      {/* Botón de regreso al Home */}
+      <TouchableOpacity style={styles.goBackButton} onPress={() => router.push('/(app)/home')}>
+          <Text style={styles.goBackText}>← Regresar</Text>
+      </TouchableOpacity>
       <Text style={styles.title}>Menú de Items</Text>
 
       {loading ? (
@@ -125,10 +124,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     color: colors.buttonText,
     fontWeight: 'bold',
     marginBottom: 20,
+    alignSelf: 'center',
   },
   itemContainer: {
     flexDirection: 'column',
