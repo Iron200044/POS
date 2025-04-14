@@ -35,8 +35,19 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, mesa } = useAuthContext(); // Get both user and mesa from AuthContext
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const addItemToCart = (item: CartItem) => {
-    setCartItems((prevItems) => [...prevItems, item]);
+  const addItemToCart = (newItem:CartItem) => {
+    // Verificar si el item ya existe en el carrito
+    const existingItemIndex = cartItems.findIndex(item => item.id === newItem.id);
+    
+    if (existingItemIndex >= 0) {
+      // Si el item ya existe, actualiza la cantidad
+      const updatedItems = [...cartItems];
+      updatedItems[existingItemIndex].quantity += newItem.quantity;
+      setCartItems(updatedItems);
+    } else {
+      // Si es un nuevo item, añádelo al carrito
+      setCartItems([...cartItems, newItem]);
+    }
   };
 
   const removeItemFromCart = (id: string) => {
